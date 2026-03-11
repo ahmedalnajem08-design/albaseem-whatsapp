@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AL-BASEEM WhatsApp Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #25D366;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .logo p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+        
+        .status-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .status-badge.initializing {
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+        }
+        
+        .status-badge.qr {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+        
+        .status-badge.authenticated {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9C27B0;
+        }
+        
+        .status-badge.ready {
+            background: rgba(37, 211, 102, 0.2);
+            color: #25D366;
+        }
+        
+        .status-badge.disconnected {
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+        }
+        
+        .status-badge .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-badge.initializing .dot { background: #FFC107; }
+        .status-badge.qr .dot { background: #2196F3; }
+        .status-badge.authenticated .dot { background: #9C27B0; }
+        .status-badge.ready .dot { background: #25D366; }
+        .status-badge.disconnected .dot { background: #F44336; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .qr-container img {
+            max-width: 280px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .qr-placeholder {
+            width: 280px;
+            height: 280px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+        
+        .qr-placeholder .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #25D366;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .instructions h3 {
+            color: #25D366;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .instructions ol {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 2;
+            padding-right: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #F44336, #C62828);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            margin: 20px auto;
+        }
+        
+        .success-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .whatsapp-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .api-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .api-info h4 {
+            color: #25D366;
+            margin-bottom: 15px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .api-info code {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <svg class="whatsapp-icon" viewBox="0 0 24 24" fill="#25D366">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            <h1>AL-BASEEM WhatsApp</h1>
+            <p>نظام إرسال الرسائل عبر الواتساب</p>
+        </div>
+        
+        <div class="status-container">
+            <div id="statusBadge" class="status-badge initializing">
+                <span class="dot"></span>
+                <span id="statusText">جاري التهيئة...</span>
+            </div>
+        </div>
+        
+        <div id="qrSection" class="qr-container">
+            <div class="qr-placeholder">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        
+        <div id="successSection" style="display: none;">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="#25D366">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+            </div>
+            <p style="text-align: center; color: #25D366; font-size: 18px; font-weight: 600;">متصل بنجاح!</p>
+            <p style="text-align: center; color: rgba(255,255,255,0.7); font-size: 14px; margin-top: 10px;">يمكنك الآن إرسال الرسائل من النظام</p>
+        </div>
+        
+        <div id="actionsSection" class="actions" style="display: none;">
+            <button id="restartBtn" class="btn btn-primary">إعادة الاتصال</button>
+            <button id="logoutBtn" class="btn btn-danger">تسجيل الخروج</button>
+        </div>
+        
+        <div id="instructionsSection" class="instructions">
+            <h3>طريقة الربط:</h3>
+            <ol>
+                <li>افتح تطبيق الواتساب على هاتفك</li>
+                <li>اذهب إلى الإعدادات > الأجهزة المرتبطة</li>
+                <li>اضغط على "ربط جهاز"</li>
+                <li>امسح رمز QR الظاهر أعلاه</li>
+            </ol>
+        </div>
+        
+        <div id="apiSection" class="api-info" style="display: none;">
+            <h4>API Endpoints:</h4>
+            <code>GET /api/status - حالة الاتصال</code>
+            <code>GET /api/qr - الحصول على QR</code>
+            <code>POST /api/send-message - إرسال رسالة</code>
+            <code>Body: { "phone": "9647701234567", "message": "النص" }</code>
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
+        const qrSection = document.getElementById('qrSection');
+        const successSection = document.getElementById('successSection');
+        const actionsSection = document.getElementById('actionsSection');
+        const instructionsSection = document.getElementById('instructionsSection');
+        const apiSection = document.getElementById('apiSection');
+        const restartBtn = document.getElementById('restartBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        const statusLabels = {
+            'initializing': 'جاري التهيئة...',
+            'qr': 'امسح رمز QR للاتصال',
+            'authenticated': 'جاري التحقق...',
+            'ready': 'متصل ✓',
+            'disconnected': 'تم قطع الاتصال',
+            'auth_failure': 'فشل في المصادقة',
+            'logged_out': 'تم تسجيل الخروج'
+        };
+        
+        function updateStatus(status) {
+            statusBadge.className = 'status-badge ' + status;
+            statusText.textContent = statusLabels[status] || status;
+            
+            // Show/hide sections based on status
+            if (status === 'ready') {
+                qrSection.style.display = 'none';
+                successSection.style.display = 'block';
+                instructionsSection.style.display = 'none';
+                actionsSection.style.display = 'flex';
+                apiSection.style.display = 'block';
+            } else if (status === 'qr') {
+                qrSection.style.display = 'block';
+                successSection.style.display = 'none';
+                instructionsSection.style.display = 'block';
+                actionsSection.style.display = 'none';
+                apiSection.style.display = 'none';
+            } else {
+                qrSection.style.display = 'block';
+                successSection.style.display = 'none';
+                instructionsSection.style.display = 'block';
+                actionsSection.style.display = 'none';
+                apiSection.style.display = 'none';
+            }
+        }
+        
+        socket.on('status', (status) => {
+            console.log('Status:', status);
+            updateStatus(status);
+        });
+        
+        socket.on('qr', (qrImage) => {
+            console.log('QR received');
+            qrSection.innerHTML = '<img src="' + qrImage + '" alt="WhatsApp QR Code">';
+        });
+        
+        socket.on('message', (data) => {
+            console.log('Message received:', data);
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            socket.emit('restart');
+            updateStatus('initializing');
+        });
+        
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                socket.emit('logout');
+                updateStatus('initializing');
+            }
+        });
+        
+        // Check status on page load
+        fetch('/api/status')
+            .then(res => res.json())
+            .then(data => {
+                if (data.ready) {
+                    updateStatus('ready');
+                }
+            })
+            .catch(err => console.error('Error checking status:', err));
+    </script>
+</body>
+</html>
