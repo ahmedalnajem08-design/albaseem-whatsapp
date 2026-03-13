@@ -38,7 +38,7 @@ function initWhatsAppClient() {
     }),
     puppeteer: {
       headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -48,10 +48,11 @@ function initWhatsAppClient() {
         '--no-zygote',
         '--single-process',
         '--disable-gpu',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-software-rasterizer'
+        '--disable-software-rasterizer',
+        '--disable-extensions',
+        '--disable-default-apps',
+        '--disable-translate',
+        '--disable-sync'
       ]
     }
   });
